@@ -1,0 +1,361 @@
+type Action {
+  action_id: Int!
+  action_name: String!
+  page_media: String
+  action_icon: String
+  fallback_quiz_media: String
+  is_hidden: Boolean
+}
+
+type ActionItem {
+  action_id: Int!
+  item_name: String!
+  item_description: String!
+  co2_saved_per_unit: Float!
+}
+
+input ActionItemInput {
+  item_name: String!
+  item_description: String!
+  co2_saved_per_unit: Float!
+}
+
+input ActionItemInputId {
+  action_id: Int!
+  item_name: String!
+  item_description: String!
+  co2_saved_per_unit: Float!
+}
+
+type ActionQuiz {
+  quiz_id: Int!
+  fact_text: String!
+  question_text: String!
+  action_id: ID!
+}
+
+type ActionQuizAnswer {
+  quiz_id: Int!
+  answer: String!
+  is_correct_answer: Boolean!
+}
+
+type ActionValidationLabel {
+  action_id: Int!
+  validation_label: String!
+}
+
+type ActionWithLabels {
+  action_id: Int!
+  action_name: String!
+  page_media: String
+  action_icon: String
+  fallback_quiz_media: String
+  validation_labels: String
+  is_hidden: Boolean
+}
+
+type Group {
+  group_id: Int!
+  group_name: String!
+  group_description: String
+  group_image: String
+  is_public: Boolean!
+  private_password: String
+  total_co2: Float
+  total_points: Int
+  weekly_co2: Float
+  weekly_points: Int
+}
+
+type GroupInfo {
+  total_co2: Float
+  week_co2: Float
+  number_of_users: Float
+}
+
+type GroupUser {
+  group_id: Int!
+  user_id: Int!
+  user_role: UserRoleInGroup!
+}
+
+type Mutation {
+  # Put a single value of type User
+  createUser(
+    name: String!,
+    email: String!,
+    avatar: String,
+    username: String
+  ): User
+  # update a single value of type User, needs at least one of name, email, avatar
+  updateUser(
+    user_id: Int!,
+    name: String,
+    email: String,
+    avatar: String,
+    username: String
+  ): User
+  deleteUser(user_id: Int!): String
+  createSubmittedAction(
+    user_id: Int!,
+    action_id: Int!,
+    quiz_id: Int,
+    g_co2_saved: Float!,
+    date_of_action: String!,
+    first_quiz_answer_correct: Boolean!,
+    quiz_answered: Boolean!,
+    is_validated: Boolean!,
+    points_earned: Int!
+  ): SubmittedAction
+  createSubmittedActionItem(sa_id: Int!, item_name: String!, input_value: Float!): SubmittedActionItem
+  createSubmittedActionItems(sa_id: Int!, submitted_action_items: [SubmittedActionItemInput!]!): [SubmittedActionItem]
+  createAction(
+    action_name: String!,
+    page_media: String,
+    action_icon: String,
+    fallback_quiz_media: String
+  ): Action
+  createActionItems(action_id: Int!, action_items: [ActionItemInput!]!): [ActionItem]
+  createActionValidationLabels(action_id: Int!, validation_labels: [String!]!): [ActionValidationLabel]
+  deleteAction(action_id: Int!): String
+  createGroup(
+    group_name: String!,
+    group_description: String,
+    group_image: String,
+    is_public: Boolean!,
+    private_password: String
+  ): Group
+  createGroupAndOwner(
+    owner_user_id: Int!,
+    group_name: String!,
+    group_description: String,
+    group_image: String,
+    is_public: Boolean!,
+    private_password: String
+  ): Group
+  updateGroup(
+    group_id: Int!,
+    group_name: String,
+    group_description: String,
+    group_image: String,
+    is_public: Boolean,
+    private_password: String
+  ): Group
+  deleteGroup(group_id: Int!): String
+  addGroupUser(group_id: Int!, user_id: Int!, user_role: UserRoleInGroup!): GroupUser
+  addGroupOwner(group_id: Int!, user_id: Int!): GroupUser
+  addGroupMember(group_id: Int!, user_id: Int!): GroupUser
+  demoteGroupOwner(group_id: Int!, user_id: Int!): GroupUser
+  promoteGroupMember(group_id: Int!, user_id: Int!): GroupUser
+  removeGroupMember(group_id: Int!, user_id: Int!): String
+  approveSubmittedAction(sa_id: Int!): SubmittedAction
+  rejectSubmittedAction(sa_id: Int!): String
+  updateAction(
+    action_id: Int!,
+    action_name: String,
+    page_media: String,
+    action_icon: String,
+    fallback_quiz_media: String
+  ): Action
+  remakeActionItems(action_id: Int!, action_items: [ActionItemInputId!]!): [ActionItem]
+  remakeActionValidationLabels(action_id: Int!, validation_labels: [String!]!): [ActionValidationLabel]
+  deleteActionItem(action_id: Int!, item_name: String): String
+  deleteActionValidationLabel(action_id: Int!, validation_label: String!): String
+  graveyardAction(action_id: Int!): Action
+  restoreAction(action_id: Int!): Action
+}
+
+type Query {
+  # Get a single value of type 'User' by primary key.
+  getSingleUser(user_id: Int!): UserWithStats
+  getSingleUserByUsername(username: String!): UserWithStats
+  getSingleUserByEmail(email: String!): UserWithStats
+  getSingleSubmittedAction(sa_id: Int!): SubmittedAction
+  getSingleSubmittedActionWithItems(sa_id: Int!): SubmittedActionWithItems
+  getSingleAction(action_id: Int!): ActionWithLabels
+  getTotalGlobalCO2: Float
+  getUsersTotalCO2(user_id: Int!): Float
+  getGroupsTotalCO2(group_id: Int!): Float
+  getUsersWeekCO2(user_id: Int!): Float
+  getGroupsWeekCO2(group_id: Int!): Float
+  getAllUsers: [UserWithStats]
+  getAllActions: [ActionWithLabels]
+  getAllUngraveyardedActions: [ActionWithLabels]
+  getAllSubmittedActions: [SubmittedAction]
+  getAllActionItems: [ActionItem]
+  getActionItemsForAction(action_id: Int!): [ActionItem]
+  getAllSubmittedActionsForUser(user_id: Int!): [SubmittedActionWithItemsEmbedded]
+  getAllValidatedSubmittedActionsForUser(user_id: Int!): [SubmittedActionWithItemsEmbedded]
+  getAllUnvalidatedSubmittedActionsForUser(user_id: Int!): [SubmittedActionWithItemsEmbedded]
+  getAllGraveyardedSubmittedActionsForUser(user_id: Int!): [SubmittedActionWithItemsEmbedded]
+  getAllGroups: [Group]
+  getSingleGroup(group_id: Int!): Group
+  getSingleGroupByName(group_name: String!): Group
+  getAllUsersInGroup(group_id: Int): [UserWithRoleAndStats]
+  getAllOwnersInGroup(group_id: Int): [User]
+  getAllMembersInGroup(group_id: Int): [User]
+  getAllValidatedSubmittedActionsInGroup(group_id: Int): [SubmittedActionWithItemsEmbedded]
+  getAllGroupsForUser(user_id: Int): [Group]
+  getAllGroupsUserOwns(user_id: Int): [Group]
+  getGroupTotalCO2(group_id: Int!): Float
+  isPrivateGroupPasswordCorrect(group_id: Int!, private_password: String!): Boolean
+  getAllSubmittedActionsToValidate(user_id: Int!): [SubmittedActionWithItemsEmbeddedAndUserAndGroup]
+}
+
+type Role {
+  user_id: Int!
+  role: UserRole!
+}
+
+type SubmittedAction {
+  sa_id: Int!
+  user_id: Int!
+  action_id: Int!
+  quiz_id: Int
+  g_co2_saved: Float!
+  date_of_action: String!
+  time_submitted: String
+  first_quiz_answer_correct: Boolean!
+  quiz_answered: Boolean!
+  is_validated: Boolean!
+  points_earned: Int!
+  submitted_image: String
+  is_rejected: Boolean
+  is_image_explicit: Boolean
+}
+
+type SubmittedActionItem {
+  item_name: String!
+  sa_id: Int!
+  input_value: Float
+}
+
+input SubmittedActionItemInput {
+  item_name: String!
+  input_value: Float!
+}
+
+type SubmittedActionWithItems {
+  sa_id: Int!
+  user_id: Int!
+  action_id: Int!
+  quiz_id: Int
+  g_co2_saved: Float!
+  date_of_action: String!
+  time_submitted: String
+  first_quiz_answer_correct: Boolean!
+  quiz_answered: Boolean!
+  is_validated: Boolean!
+  points_earned: Int!
+  submitted_image: String
+  submitted_action_items: [SubmittedActionItem]
+  is_rejected: Boolean
+  is_image_explicit: Boolean
+}
+
+type SubmittedActionWithItemsEmbedded {
+  sa_id: Int!
+  user_id: Int!
+  action_id: Int!
+  quiz_id: Int
+  g_co2_saved: Float!
+  date_of_action: String!
+  time_submitted: String
+  first_quiz_answer_correct: Boolean!
+  quiz_answered: Boolean!
+  is_validated: Boolean!
+  points_earned: Int!
+  submitted_action_items: String
+  action_name: String
+  submitted_image: String
+  is_rejected: Boolean
+  is_image_explicit: Boolean
+}
+
+type SubmittedActionWithItemsEmbeddedAndUserAndGroup {
+  sa_id: Int!
+  user_id: Int!
+  action_id: Int!
+  quiz_id: Int
+  g_co2_saved: Float!
+  date_of_action: String!
+  time_submitted: String
+  first_quiz_answer_correct: Boolean!
+  quiz_answered: Boolean!
+  is_validated: Boolean!
+  points_earned: Int!
+  submitted_action_items: String
+  action_name: String
+  submitted_image: String
+  name_of_user: String
+  group_names: String
+  is_rejected: Boolean
+  is_image_explicit: Boolean
+}
+
+type User {
+  user_id: Int!
+  name: String!
+  email: String!
+  avatar: String
+  username: String
+}
+
+enum UserRole {
+  student
+  educator
+  administrator
+  user
+}
+
+enum UserRoleInGroup {
+  owner
+  member
+}
+
+type UserWithRole {
+  user_id: Int!
+  name: String!
+  email: String!
+  avatar: String
+  user_role: UserRoleInGroup!
+  username: String
+}
+
+type UserWithRoleAndStats {
+  user_id: Int!
+  name: String!
+  email: String!
+  avatar: String
+  user_role: UserRoleInGroup!
+  total_co2: Float
+  total_points: Int
+  weekly_co2: Float
+  weekly_points: Int
+  username: String
+}
+
+type UserWithStats {
+  user_id: Int!
+  name: String!
+  email: String!
+  avatar: String
+  total_co2: Float
+  total_points: Int
+  weekly_co2: Float
+  weekly_points: Int
+  username: String
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type updateActionItemsType {
+  original_item_name: String
+  new_item_name: String
+  item_description: String
+  co2_saved_per_unit: Float
+}

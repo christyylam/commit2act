@@ -160,7 +160,7 @@ const Landing = ({ user, userType }) => {
                 maxWidth: { xs: '400px', sm: '100%' },
               }}
             >
-              Welcome {user.name}!!
+              Welcome {user.name}!
             </Typography>
             {numActionsToValidate > 0 && (
               <Alert
